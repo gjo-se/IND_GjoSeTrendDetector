@@ -17,7 +17,7 @@
 #property   copyright   "2021, GjoSe"
 #property   link        "http://www.gjo-se.com"
 #property   description "GjoSe Trenddetector"
-#define     VERSION "1.0.0-dev"
+#define     VERSION "1.1.0"
 #property   version VERSION
 #property   strict
 
