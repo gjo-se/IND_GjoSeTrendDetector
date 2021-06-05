@@ -12,54 +12,49 @@
    ===============
 
 //*/
-
-#include <GjoSe\Indicators\MovingAverages.mqh>
-#include <GjoSe\\Objects\\InclVLine.mqh>
-
-// Berta ""
+#include "Basics\\Includes.mqh"
 
 #property   copyright   "2021, GjoSe"
 #property   link        "http://www.gjo-se.com"
 #property   description "GjoSe Trenddetector"
-#define     VERSION "1.0.0-dev"
+#define     VERSION "1.1.0"
 #property   version VERSION
 #property   strict
 
 #property indicator_separate_window
 
 #property indicator_applied_price   PRICE_CLOSE
-#property indicator_minimum            -1.4
-#property indicator_maximum            +1.4
+#property indicator_minimum            -300
+#property indicator_maximum            +300
 
-#property indicator_buffers   1
+#property indicator_buffers   4
 #property indicator_plots     1
 
 #property indicator_type1     DRAW_HISTOGRAM
 #property indicator_color1    Black
 #property indicator_width1    2
 
+double ExtFastMaBuffer[];
+double ExtMiddleMaBuffer[];
+double ExtSlowMaBuffer[];
 
-input int   InpFastMAPeriod = 18;
-input int   InpMiddleMAPeriod = 150;
-input int   InpSlowMAPeriod = 280;
-
-double      TrendBuffer[];
-
-const int   UP_TREND = 1;
-const int   DOWN_TREND = -1;
-const int   ROTATION_AREA = 0;
+int    ExtFastMaHandle;
+int    ExtMiddleMaHandle;
+int    ExtSlowMaHandle;
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
 void OnInit() {
    SetIndexBuffer(0, TrendBuffer, INDICATOR_DATA);
-   PlotIndexSetInteger(0, PLOT_DRAW_BEGIN, InpSlowMAPeriod);
-   PlotIndexSetString(0, PLOT_LABEL, "GjoSe Trenddetector( " + (string)InpFastMAPeriod +
-                      ", " + (string)InpMiddleMAPeriod + ", " + (string) InpSlowMAPeriod + " ) Version: " + VERSION);
+   SetIndexBuffer(1, ExtFastMaBuffer, INDICATOR_CALCULATIONS);
+   SetIndexBuffer(2, ExtMiddleMaBuffer, INDICATOR_CALCULATIONS);
+   SetIndexBuffer(3, ExtSlowMaBuffer, INDICATOR_CALCULATIONS);
 
-   //int fastMAHandle = iMA(Symbol(), PERIOD_CURRENT, "Custom Moving Average", 13, 0, MODE_EMA, PRICE_TYPICAL);
-   //int handle=iMA(Symbol(),PERIOD_M1,InpFastMAPeriod,0,MODE_SMA,PRICE_CLOSE); 
+   ExtFastMaHandle = iMA(NULL, 0, InpFastMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
+   ExtMiddleMaHandle = iMA(NULL, 0, InpMiddleMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
+   ExtSlowMaHandle = iMA(NULL, 0, InpSlowMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
+
 }
 
 //+------------------------------------------------------------------+
@@ -80,56 +75,81 @@ int OnCalculate(const int pRatesTotal,
 
    if(pRatesTotal < InpSlowMAPeriod) {
       return(0);
-      Print("Berta: " + pRatesTotal);
+   }
+
+   int calculated = BarsCalculated(ExtFastMaHandle);
+   if(calculated < pRatesTotal) {
+      Print("Not all data of ExtFastMaHandle is calculated (", calculated, " bars). Error ", GetLastError());
+      return(0);
+   }
+   calculated = BarsCalculated(ExtMiddleMaHandle);
+   if(calculated < pRatesTotal) {
+      Print("Not all data of ExtMiddleMaHandle is calculated (", calculated, " bars). Error ", GetLastError());
+      return(0);
+   }
+   calculated = BarsCalculated(ExtSlowMaHandle);
+   if(calculated < pRatesTotal) {
+      Print("Not all data of ExtSlowMaHandle is calculated (", calculated, " bars). Error ", GetLastError());
+      return(0);
+   }
+
+   int to_copy;
+   if(pPrevCalculated > pRatesTotal || pPrevCalculated < 0)
+      to_copy = pRatesTotal;
+   else {
+      to_copy = pRatesTotal - pPrevCalculated;
+      if(pPrevCalculated > 0)
+         to_copy++;
+   }
+   if(IsStopped()) return(0);
+   if(CopyBuffer(ExtFastMaHandle, 0, 0, to_copy, ExtFastMaBuffer) <= 0) {
+      Print("Getting fast EMA is failed! Error ", GetLastError());
+      return(0);
+   }
+
+   if(IsStopped()) return(0);
+   if(CopyBuffer(ExtMiddleMaHandle, 0, 0, to_copy, ExtMiddleMaBuffer) <= 0) {
+      Print("Getting slow SMA is failed! Error ", GetLastError());
+      return(0);
+   }
+
+   if(IsStopped()) return(0);
+   if(CopyBuffer(ExtSlowMaHandle, 0, 0, to_copy, ExtSlowMaBuffer) <= 0) {
+      Print("Getting slow SMA is failed! Error ", GetLastError());
+      return(0);
    }
 
    if(pPrevCalculated == 0) {
-      start = InpSlowMAPeriod;
+      start = 0;
    } else {
       start = pPrevCalculated - 1;
    }
 
-// Loop of calculating the indicator buffer values:
-   for(i = start; i < pRatesTotal; i++) {
+   for(i = start; i < pRatesTotal && !IsStopped(); i++) {
       TrendBuffer[i] = TrendDetector(i, close);
 
-      if(TrendBuffer[i] != TrendBuffer[i - 1]) {
-         createVLine(__FUNCTION__ + time[i], time[i]);
+      if(i > 0) {
+         // RO => UP
+         if((TrendBuffer[i - 1] == 0 && TrendBuffer[i] > 0)) {
+            createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrGreen, 2);
+         }
+         // UP => RO
+         if((TrendBuffer[i - 1] > 0 && TrendBuffer[i] == 0)) {
+            createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrBlack);
+         }
+          // RO => DOWN
+         if((TrendBuffer[i - 1] == 0 && TrendBuffer[i] < 0)) {
+            createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrRed, 2);
+         }
+         // DOWN => RO
+         if((TrendBuffer[i - 1] < 0 && TrendBuffer[i] == 0)) {
+            createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrBlack);
+         }
       }
    }
 
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
    return(pRatesTotal);
 }
 //+------------------------------------------------------------------+
-int TrendDetector(int pBarShift, const double &pPrice[]) {
 
-   double   bid = 0;
-   double   fastMA = 0;
-   double   middleMA = 0;
-   double   slowMA = 0;
-   int      trendDirection = ROTATION_AREA;
-
-   bid = SymbolInfoDouble(Symbol(),SYMBOL_BID);
-   fastMA = SimpleMA(pBarShift, InpFastMAPeriod, pPrice);
-   middleMA = SimpleMA(pBarShift, InpMiddleMAPeriod, pPrice);
-   slowMA = SimpleMA(pBarShift, InpSlowMAPeriod, pPrice);
-   
-   
-   
-   Print("Diff bid-Fast: " + (bid / Point() - fastMA / Point()));
-   Print("pPrice[0]: " + bid / Point());
-
-   if(bid > fastMA && fastMA > middleMA && middleMA > slowMA) {
-      trendDirection = UP_TREND;
-   }
-
-   if(bid < fastMA && fastMA < middleMA && middleMA < slowMA) {
-      trendDirection = DOWN_TREND;
-   }
-
-   return(trendDirection);
-}
 //+------------------------------------------------------------------+
