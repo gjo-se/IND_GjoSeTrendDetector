@@ -8,6 +8,7 @@
    ===============
 
    1.0.0 Initial version
+   1.3.0 optimize Trend
 
    ===============
 
@@ -17,7 +18,7 @@
 #property   copyright   "2021, GjoSe"
 #property   link        "http://www.gjo-se.com"
 #property   description "GjoSe Trenddetector"
-#define     VERSION "1.1.0"
+#define     VERSION "1.3.0"
 #property   version VERSION
 #property   strict
 
@@ -27,16 +28,12 @@
 #property indicator_minimum            -300
 #property indicator_maximum            +300
 
-#property indicator_buffers   4
+#property indicator_buffers   5
 #property indicator_plots     1
 
-#property indicator_type1     DRAW_HISTOGRAM
-#property indicator_color1    Black
+#property indicator_type1     DRAW_COLOR_HISTOGRAM
+#property indicator_color1    clrBlack, clrGreen, clrRed
 #property indicator_width1    2
-
-double ExtFastMaBuffer[];
-double ExtMiddleMaBuffer[];
-double ExtSlowMaBuffer[];
 
 int    ExtFastMaHandle;
 int    ExtMiddleMaHandle;
@@ -47,9 +44,12 @@ int    ExtSlowMaHandle;
 //+------------------------------------------------------------------+
 void OnInit() {
    SetIndexBuffer(0, TrendBuffer, INDICATOR_DATA);
-   SetIndexBuffer(1, ExtFastMaBuffer, INDICATOR_CALCULATIONS);
-   SetIndexBuffer(2, ExtMiddleMaBuffer, INDICATOR_CALCULATIONS);
-   SetIndexBuffer(3, ExtSlowMaBuffer, INDICATOR_CALCULATIONS);
+   SetIndexBuffer(1, ColorBuffer, INDICATOR_COLOR_INDEX);
+
+   SetIndexBuffer(2, ExtFastMaBuffer, INDICATOR_CALCULATIONS);
+   SetIndexBuffer(3, ExtMiddleMaBuffer, INDICATOR_CALCULATIONS);
+   SetIndexBuffer(4, ExtSlowMaBuffer, INDICATOR_CALCULATIONS);
+
 
    ExtFastMaHandle = iMA(NULL, 0, InpFastMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
    ExtMiddleMaHandle = iMA(NULL, 0, InpMiddleMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
@@ -126,25 +126,25 @@ int OnCalculate(const int pRatesTotal,
    }
 
    for(i = start; i < pRatesTotal && !IsStopped(); i++) {
-      TrendBuffer[i] = TrendDetector(i, close);
+      TrendBuffer[i] = TrendDetector(i, close, time);
 
       if(i > 0) {
          // RO => UP
-         if((TrendBuffer[i - 1] == 0 && TrendBuffer[i] > 0)) {
-            createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrGreen, 2);
-         }
-         // UP => RO
-         if((TrendBuffer[i - 1] > 0 && TrendBuffer[i] == 0)) {
-            createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrBlack);
-         }
-          // RO => DOWN
-         if((TrendBuffer[i - 1] == 0 && TrendBuffer[i] < 0)) {
-            createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrRed, 2);
-         }
-         // DOWN => RO
-         if((TrendBuffer[i - 1] < 0 && TrendBuffer[i] == 0)) {
-            createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrBlack);
-         }
+         //if((TrendBuffer[i - 1] == 0 && TrendBuffer[i] > 0)) {
+         //   createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrGreen, 2);
+         //}
+         //// UP => RO
+         //if((TrendBuffer[i - 1] > 0 && TrendBuffer[i] == 0)) {
+         //   createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrBlack);
+         //}
+         //// RO => DOWN
+         //if((TrendBuffer[i - 1] == 0 && TrendBuffer[i] < 0)) {
+         //   createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrRed, 2);
+         //}
+         //// DOWN => RO
+         //if((TrendBuffer[i - 1] < 0 && TrendBuffer[i] == 0)) {
+         //   createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrBlack);
+         //}
       }
    }
 
