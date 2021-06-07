@@ -4,7 +4,7 @@
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
 
-double TrendDetector(int pBarShift, const double &pPrice[]) {
+double TrendDetector(int pBarShift, const double &pPrice[], const datetime &pTime[]) {
 
    double   fastMA = 0;
    double   middleMA = 0;
@@ -13,37 +13,69 @@ double TrendDetector(int pBarShift, const double &pPrice[]) {
    double   middleMAPoints = 0;
    double   slowMAPoints = 0;
    double   trendStrength = ROTATION_AREA;
-   double   minMiddleSlowOffset = 25;
+   double   fastMiddleOffset = 0;
+   double   middleSlowOffset = 0;
 
    fastMA = ExtFastMaBuffer[pBarShift];
    middleMA = ExtMiddleMaBuffer[pBarShift];
    slowMA = ExtSlowMaBuffer[pBarShift];
-   
+
    fastMAPoints = fastMA / Point();
    middleMAPoints = middleMA / Point();
    slowMAPoints = slowMA / Point();
-   
-    // UP-TREND
+
+   fastMiddleOffset = MathMax(fastMAPoints, middleMAPoints) - MathMin(fastMAPoints, middleMAPoints);
+   middleSlowOffset = MathMax(middleMAPoints, slowMAPoints) - MathMin(middleMAPoints, slowMAPoints);
+
+// UP-TREND
    if(fastMA > middleMA && middleMA > slowMA) {
       trendStrength = fastMAPoints - middleMAPoints;
-      if(trendStrength < InpMinTrendStrength){
-        trendStrength = ROTATION_AREA;
+      ColorBuffer[pBarShift] = 1;
+
+      if(trendStrength < InpMinTrendStrength || middleSlowOffset < InpMinMiddleSlowOffset) {
+         trendStrength = ROTATION_AREA;
+         ColorBuffer[pBarShift] = 0;
+      }
+
+      if(fastMiddleOffset > InpMinFastMiddleOffset) {
+         trendStrength = fastMAPoints - middleMAPoints;
+         ColorBuffer[pBarShift] = 1;
+      }
+
+      if(ColorBuffer[pBarShift - 1] == 0 && ColorBuffer[pBarShift] == 1) {
+         createVLine(__FUNCTION__ + IntegerToString(pTime[pBarShift]), pTime[pBarShift], clrGreen, 2);
+      }
+      if(ColorBuffer[pBarShift - 1] == 1 && ColorBuffer[pBarShift] == 0) {
+         createVLine(__FUNCTION__ + IntegerToString(pTime[pBarShift]), pTime[pBarShift], clrBlack);
       }
    }
 
-    // DOWN-TREND
+// DOWN-TREND
    if(fastMA < middleMA && middleMA < slowMA) {
       trendStrength = fastMAPoints - middleMAPoints;
-      if(trendStrength > InpMinTrendStrength){
-        trendStrength = ROTATION_AREA;
+      ColorBuffer[pBarShift] = 2;
+
+      if(trendStrength > InpMinTrendStrength * -1 || middleSlowOffset < InpMinMiddleSlowOffset) {
+         trendStrength = ROTATION_AREA;
+         ColorBuffer[pBarShift] = 0;
+      }
+
+      if(fastMiddleOffset > InpMinFastMiddleOffset) {
+         trendStrength = fastMAPoints - middleMAPoints;
+         ColorBuffer[pBarShift] = 2;
+      }
+
+      if(ColorBuffer[pBarShift - 1] == 0 && ColorBuffer[pBarShift] == 2) {
+         createVLine(__FUNCTION__ + IntegerToString(pTime[pBarShift]), pTime[pBarShift], clrRed, 2);
+      }
+      if(ColorBuffer[pBarShift - 1] == 2 && ColorBuffer[pBarShift] == 0) {
+         createVLine(__FUNCTION__ + IntegerToString(pTime[pBarShift]), pTime[pBarShift], clrBlack);
       }
    }
 
-   // Filter ROTATION_AREA
-   if(MathMax(middleMAPoints, slowMAPoints) - MathMin(middleMAPoints, slowMAPoints) < minMiddleSlowOffset){
-      trendStrength = ROTATION_AREA;
-   }
+//   ColorBuffer[pBarShift] = 2;
 
    return(trendStrength);
 }
+//+------------------------------------------------------------------+
 //+------------------------------------------------------------------+

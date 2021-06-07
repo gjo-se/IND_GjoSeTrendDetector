@@ -8,3 +8,5 @@ input int                 InpFastMAPeriod = 10;
 input int                 InpMiddleMAPeriod = 100;
 input int                 InpSlowMAPeriod = 200;
 input double              InpMinTrendStrength = 30;
+input double              InpMinFastMiddleOffset = 30;
+input double              InpMinMiddleSlowOffset = 30;
