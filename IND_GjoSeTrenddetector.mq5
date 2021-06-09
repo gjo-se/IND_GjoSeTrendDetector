@@ -9,6 +9,7 @@
 
    1.0.0 Initial version
    1.3.0 optimize Trend
+   1.4.0 add GWL
 
    ===============
 
