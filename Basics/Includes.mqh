@@ -19,7 +19,7 @@
 #include <Mql5Book\Indicators.mqh>
 #include <Trade\DealInfo.mqh>
 
-#include "Globals.mqh"
+#include "Global.mqh"
 
 #include <GjoSe\\Utilities\\InclUtilities.mqh>
 #include <GjoSe\\Objects\\InclLabel.mqh>
