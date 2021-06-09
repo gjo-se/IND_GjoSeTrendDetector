@@ -9,6 +9,7 @@
 
    1.0.0 Initial version
    1.3.0 optimize Trend
+   1.4.0 add GWL
 
    ===============
 
@@ -25,8 +26,8 @@
 #property indicator_separate_window
 
 #property indicator_applied_price   PRICE_CLOSE
-#property indicator_minimum            -300
-#property indicator_maximum            +300
+//#property indicator_minimum            -1300
+//#property indicator_maximum            +1300
 
 #property indicator_buffers   5
 #property indicator_plots     1
@@ -51,9 +52,9 @@ void OnInit() {
    SetIndexBuffer(4, ExtSlowMaBuffer, INDICATOR_CALCULATIONS);
 
 
-   ExtFastMaHandle = iMA(NULL, 0, InpFastMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
-   ExtMiddleMaHandle = iMA(NULL, 0, InpMiddleMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
-   ExtSlowMaHandle = iMA(NULL, 0, InpSlowMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
+   ExtFastMaHandle = iMA(Symbol(), InpTimeframe, InpFastMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
+   ExtMiddleMaHandle = iMA(Symbol(), InpTimeframe, InpMiddleMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
+   ExtSlowMaHandle = iMA(Symbol(), InpTimeframe, InpSlowMAPeriod, 0, MODE_SMA, PRICE_CLOSE);
 
 }
 
@@ -126,7 +127,9 @@ int OnCalculate(const int pRatesTotal,
    }
 
    for(i = start; i < pRatesTotal && !IsStopped(); i++) {
-      TrendBuffer[i] = TrendDetector(i, close, time);
+
+      if(InpSGL_GWL_Type == SGL) TrendBuffer[i] = SGLTrendDetector(i, close, time);
+      //if(InpSGL_GWL_Type == GWL) TrendBuffer[i] = GWLTrendDetector(i, close, time);
 
       if(i > 0) {
          // RO => UP
