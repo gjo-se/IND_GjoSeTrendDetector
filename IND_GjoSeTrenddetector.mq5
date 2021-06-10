@@ -10,6 +10,7 @@
    1.0.0 Initial version
    1.3.0 optimize Trend
    1.4.0 add GWL
+   1.4.1 add SGL & GWL
 
    ===============
 
@@ -129,7 +130,9 @@ int OnCalculate(const int pRatesTotal,
    for(i = start; i < pRatesTotal && !IsStopped(); i++) {
 
       if(InpSGL_GWL_Type == SGL) TrendBuffer[i] = SGLTrendDetector(i, close, time);
-      //if(InpSGL_GWL_Type == GWL) TrendBuffer[i] = GWLTrendDetector(i, close, time);
+      if(InpSGL_GWL_Type == GWL) TrendBuffer[i] = GWLTrendDetector(i, close, time);
+      
+      
 
       if(i > 0) {
          // RO => UP
