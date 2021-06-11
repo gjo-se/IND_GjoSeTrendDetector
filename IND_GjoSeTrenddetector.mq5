@@ -27,8 +27,8 @@
 #property indicator_separate_window
 
 #property indicator_applied_price   PRICE_CLOSE
-//#property indicator_minimum            -1300
-//#property indicator_maximum            +1300
+#property indicator_minimum            -2500
+#property indicator_maximum            2500
 
 #property indicator_buffers   5
 #property indicator_plots     1
@@ -111,7 +111,7 @@ int OnCalculate(const int pRatesTotal,
 
    if(IsStopped()) return(0);
    if(CopyBuffer(ExtMiddleMaHandle, 0, 0, to_copy, ExtMiddleMaBuffer) <= 0) {
-      Print("Getting slow SMA is failed! Error ", GetLastError());
+      Print("Getting middle SMA is failed! Error ", GetLastError());
       return(0);
    }
 
@@ -128,30 +128,7 @@ int OnCalculate(const int pRatesTotal,
    }
 
    for(i = start; i < pRatesTotal && !IsStopped(); i++) {
-
-      if(InpSGL_GWL_Type == SGL) TrendBuffer[i] = SGLTrendDetector(i, close, time);
-      if(InpSGL_GWL_Type == GWL) TrendBuffer[i] = GWLTrendDetector(i, close, time);
-      
-      
-
-      if(i > 0) {
-         // RO => UP
-         //if((TrendBuffer[i - 1] == 0 && TrendBuffer[i] > 0)) {
-         //   createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrGreen, 2);
-         //}
-         //// UP => RO
-         //if((TrendBuffer[i - 1] > 0 && TrendBuffer[i] == 0)) {
-         //   createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrBlack);
-         //}
-         //// RO => DOWN
-         //if((TrendBuffer[i - 1] == 0 && TrendBuffer[i] < 0)) {
-         //   createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrRed, 2);
-         //}
-         //// DOWN => RO
-         //if((TrendBuffer[i - 1] < 0 && TrendBuffer[i] == 0)) {
-         //   createVLine(__FUNCTION__ + IntegerToString(time[i]), time[i], clrBlack);
-         //}
-      }
+      TrendBuffer[i] = TrendDetector(i, close, time);
    }
 
    return(pRatesTotal);
