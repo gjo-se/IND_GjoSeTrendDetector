@@ -5,5 +5,5 @@
 //+------------------------------------------------------------------+
 
 const int   UP_TREND = 1;
-const int   DOWN_TREND = -1;
+const int   DOWN_TREND = 2;
 const int   ROTATION_AREA = 0;
