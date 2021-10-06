@@ -4,12 +4,9 @@
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
 
-input ENUM_TIMEFRAMES     InpTimeframe = PERIOD_M1;
 input int                 InpFastMAPeriod = 1;
-input int                 InpMiddleMAPeriod = 50;
+input int                 InpMiddleMAPeriod = 100;
 input int                 InpSlowMAPeriod = 200;
-input double              InpMinTrendStrength = 30;
-input double              InpMinFastMiddleOffset = 30;
-input double              InpMinMiddleSlowOffset = 30;
-input int                 InpExitValue = 999999;
-//+------------------------------------------------------------------+
+input ENUM_TIMEFRAMES     InpGWLTimeframe = PERIOD_H1;
+
+bool                      InpShowErrorMessages = true;

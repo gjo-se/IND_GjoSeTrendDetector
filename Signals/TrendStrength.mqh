@@ -4,7 +4,9 @@
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
 
-double TrendDetector(int pBarShift, const double &pPrice[], const datetime &pTime[]) {
+// Trendstärke aus History im Code gelassen, wird zur Zeit nicht verwendet
+
+double TrendStrength(int pBarShift, const double &pPrice[], const datetime &pTime[]) {
 
    double   fastMA = 0;
    double   middleMA = 0;
@@ -15,6 +17,7 @@ double TrendDetector(int pBarShift, const double &pPrice[], const datetime &pTim
    double   trendStrength = ROTATION_AREA;
    double   fastMiddleOffset = 0;
    double   middleSlowOffset = 0;
+   double   trendStrengthTmp = 0;
 
    fastMA = ExtFastMaBuffer[pBarShift];
    middleMA = ExtMiddleMaBuffer[pBarShift];
@@ -56,23 +59,33 @@ double TrendDetector(int pBarShift, const double &pPrice[], const datetime &pTim
       if(fastMA < middleMA) {
          trendStrength = fastMAPoints - slowMAPoints;
          ColorBuffer[pBarShift] = 2;
+         
+//         if(trendStrengthTmp < InpMinTrendStrength *-1){
+//            trendStrength = trendStrengthTmp;
+//            
+//         }
 
-         if(fastMiddleOffset < InpMinFastMiddleOffset) {
-            trendStrength = ROTATION_AREA;
-            ColorBuffer[pBarShift] = 0;
-         }
+         //if(trendStrengthTmp *-1 > InpMaxTrendStrength){
+         //   trendStrength = ROTATION_AREA;
+         //   ColorBuffer[pBarShift] = 2;
+         //}
+         
+         //if(fastMiddleOffset < InpMinFastMiddleOffset) {
+         //   trendStrength = ROTATION_AREA;
+         //   ColorBuffer[pBarShift] = 0;
+         //}
 
-         if(pBarShift > 0) {
-            if(ColorBuffer[pBarShift - 1] == 0 && ColorBuffer[pBarShift] == 2) {
-               createVLine(__FUNCTION__ + IntegerToString(pTime[pBarShift]), pTime[pBarShift], clrRed, 2);
-            }
-            if(ColorBuffer[pBarShift - 1] == 2 && ColorBuffer[pBarShift] == 0) {
-               createVLine(__FUNCTION__ + IntegerToString(pTime[pBarShift]), pTime[pBarShift], clrBlack);
-            }
-         }
+         //if(pBarShift > 0) {
+            //if(ColorBuffer[pBarShift - 1] == 0 && ColorBuffer[pBarShift] == 2) {
+            //   createVLine(__FUNCTION__ + IntegerToString(pTime[pBarShift]), pTime[pBarShift], clrRed, 2);
+            //}
+            //if(ColorBuffer[pBarShift - 1] == 2 && ColorBuffer[pBarShift] == 0) {
+            //   createVLine(__FUNCTION__ + IntegerToString(pTime[pBarShift]), pTime[pBarShift], clrBlack);
+            //}
+         //}
          
       } else {
-         trendStrength = InpExitValue;
+         //trendStrength = InpExitValue;
          ColorBuffer[pBarShift] = 0;
       }
    }

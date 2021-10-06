@@ -21,7 +21,7 @@
 
 #include "Global.mqh"
 
-#include <GjoSe\\Utilities\\InclUtilities.mqh>
+#include <GjoSe\\Utilities\\InclBasicUtilities.mqh>
 #include <GjoSe\\Objects\\InclLabel.mqh>
 #include <GjoSe\\Objects\\InclRectangleLabel.mqh>
 #include <GjoSe\\Objects\\InclHLine.mqh>
@@ -29,7 +29,7 @@
 
 #include <GjoSe\Indicators\MovingAverages.mqh>
 
-#include "..\\Signals\\TrendStrength.mqh"
+//#include "..\\Signals\\TrendStrength.mqh"
 
 
 
